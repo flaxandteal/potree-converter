@@ -24,7 +24,8 @@ RUN mamba install -y -n base -c conda-forge tbb \
 COPY --from=builder /src/PotreeConverter/build /src/PotreeConverter/build
 
 COPY convert.sh /usr/local/bin/convert.sh
-RUN chmod +x /usr/local/bin/convert.sh
+# Strip any CR (Windows CRLF) so the shebang isn't read as "bash\r" at runtime.
+RUN sed -i 's/\r$//' /usr/local/bin/convert.sh && chmod +x /usr/local/bin/convert.sh
 
 WORKDIR /data
 ENTRYPOINT ["/usr/local/bin/convert.sh"]
