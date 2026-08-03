@@ -17,7 +17,7 @@ import threading
 import tkinter as tk
 from tkinter import filedialog, ttk
 
-IMAGE = "potree-converter"
+IMAGE = "ghcr.io/flaxandteal/potree-converter:latest"
 SUPPORTED = [("Point clouds", "*.e57 *.las *.laz *.ply *.xyz *.pcd *.pts *.bpf"),
              ("All files", "*.*")]
 
@@ -112,12 +112,18 @@ class App:
             fname = os.path.basename(infile)
             base = os.path.splitext(fname)[0]
 
-            # Build the image on first use (downloads a few hundred MB, once).
+            # Fetch the image on first use (pull; build from source only if that fails).
             if subprocess.run(["docker", "image", "inspect", IMAGE],
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode != 0:
-                self.q.put("First run: building the converter image. This downloads a few "
-                           "hundred MB and may take several minutes. It only happens once…\n\n")
-                self._stream(["docker", "build", "-t", IMAGE, build_context()])
+                self.q.put("First run: downloading the converter. This is a few hundred "
+                           "MB and only happens once…\n\n")
+                if self._stream(["docker", "pull", IMAGE]) != 0:
+                    self.q.put("\nDownload failed - building it locally instead. This "
+                               "compiles from source and takes several minutes…\n\n")
+                    if self._stream(["docker", "build", "-t", IMAGE, build_context()]) != 0:
+                        self.q.put("\n*** Could not get the converter image. See the errors "
+                                   "above.\n")
+                        return
 
             cmd = ["docker", "run", "--rm"]
             if os.name != "nt":  # keep output files owned by the user on macOS/Linux

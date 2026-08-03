@@ -13,7 +13,7 @@
 # ============================================================
 set -euo pipefail
 
-IMAGE=potree-converter
+IMAGE=ghcr.io/flaxandteal/potree-converter:latest
 SCRIPTDIR="$(cd "$(dirname "$0")" && pwd)"
 
 if ! command -v docker >/dev/null 2>&1; then
@@ -30,11 +30,15 @@ if [[ $# -eq 0 ]]; then
   exit 0
 fi
 
-# Build the image on first use.
+# Fetch the image on first use.
 if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
-  echo "First run: building the converter image (downloads a few hundred MB,"
-  echo "may take several minutes). This only happens once..."
-  docker build -t "$IMAGE" "$SCRIPTDIR"
+  echo "First run: downloading the converter (a few hundred MB). This only"
+  echo "happens once..."
+  if ! docker pull "$IMAGE"; then
+    echo "Download failed - building it locally instead. This compiles from"
+    echo "source and takes several minutes..."
+    docker build -t "$IMAGE" "$SCRIPTDIR"
+  fi
 fi
 
 for f in "$@"; do

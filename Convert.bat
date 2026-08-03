@@ -10,7 +10,7 @@ REM  Requires Docker Desktop installed and running.
 REM ============================================================
 setlocal enabledelayedexpansion
 
-set "IMAGE=potree-converter"
+set "IMAGE=ghcr.io/flaxandteal/potree-converter:latest"
 set "SCRIPTDIR=%~dp0"
 
 REM --- Docker available? ---
@@ -35,19 +35,26 @@ if "%~1"=="" (
   exit /b 0
 )
 
-REM --- Build the image on first use ---
+REM --- Fetch the image on first use ---
 docker image inspect %IMAGE% >nul 2>&1
 if errorlevel 1 (
   echo.
-  echo First run: building the converter image. This downloads a few
-  echo hundred MB and may take several minutes. It only happens once.
+  echo First run: downloading the converter. This is a few hundred MB
+  echo and only happens once.
   echo.
-  docker build -t %IMAGE% "%SCRIPTDIR%."
+  docker pull %IMAGE%
   if errorlevel 1 (
     echo.
-    echo ERROR: image build failed. See the messages above.
-    pause
-    exit /b 1
+    echo Download failed - building it locally instead. This compiles from
+    echo source and takes several minutes.
+    echo.
+    docker build -t %IMAGE% "%SCRIPTDIR%."
+    if errorlevel 1 (
+      echo.
+      echo ERROR: could not get the converter image. See the messages above.
+      pause
+      exit /b 1
+    )
   )
 )
 
