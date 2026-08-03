@@ -14,7 +14,7 @@ RUN cmake -B build -DCMAKE_BUILD_TYPE=Release \
 
 # ---- Stage 2: runtime on the official PDAL image (built with E57 plugin) ----
 # pdal/pdal is condaforge/miniforge3 based and ships readers.e57.
-FROM pdal/pdal:latest
+FROM pdal/pdal:sha-4937c1b4-amd64
 
 # PotreeConverter links TBB at runtime; the PDAL image doesn't include it.
 RUN mamba install -y -n base -c conda-forge tbb \
