@@ -19,8 +19,8 @@ EASIEST WAY - the app  (Windows)
 - Double-click it. No install, no Python needed.
 - Click "Choose..." to pick your point-cloud file, pick where to
   save the result, then click Convert.
-- The FIRST conversion builds the converter and downloads a few
-  hundred MB - this can take several minutes. It only happens once.
+- The FIRST conversion downloads the converter - a few hundred MB.
+  It only happens once.
 - The result is a  <yourfile>_potree  folder in the location you
   chose. Docker Desktop must be installed and running (see setup
   above); the app will tell you if it isn't.
@@ -33,8 +33,8 @@ The app also runs on macOS / Linux if you have Python 3 installed:
 HOW TO CONVERT  (Windows, drag & drop)
 ----------------------------------------------------------------
 - Drag your point-cloud file onto  Convert.bat
-- The FIRST run builds the converter and downloads a few hundred
-  MB - this can take several minutes. It only happens once.
+- The FIRST run downloads the converter - a few hundred MB. It
+  only happens once.
 - When it finishes you'll have a new folder next to your file,
   named  <yourfile>_potree  - that's the result.
 - You can drag several files at once to convert them in a batch.
@@ -77,3 +77,14 @@ dist/.
 A GitHub Action (.github/workflows/build-windows.yml) builds the
 Windows .exe automatically: run it from the Actions tab, or push a
 git tag like v1.0 to also attach the .exe to a Release.
+
+The same workflow builds and pushes the Docker image to
+ghcr.io/flaxandteal/potree-converter, which is what all the
+launchers pull on first run (they fall back to building from the
+Dockerfile locally if the pull fails).
+
+IMPORTANT: a new GHCR package is PRIVATE until someone changes it
+by hand - github.com/orgs/flaxandteal/packages -> the package ->
+Package settings -> Change visibility -> Public. While it is
+private, users get a "denied" error unless they docker login, so
+this must be done once after the first push.
